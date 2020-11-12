@@ -1,0 +1,48 @@
+apply plugin: 'com.google.cloud.tools.appengine'
+apply plugin: 'java'
+apply plugin: 'war'
+
+sourceCompatibility = 11
+targetCompatibility = 11
+
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Jar File Example',  
+        	'Implementation-Version': '1.0',
+        	'Main-Class': 'gae.dastore.Main'
+    }
+    baseName = project.name
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+
+task copyDep(type: Copy) {
+   from configurations.compileClasspath
+   into 'build/libs'
+}
+
+repositories { 
+	mavenCentral()
+}
+
+dependencies {
+	
+	implementation 'javax.persistence:javax.persistence-api:2.2'
+	implementation 'com.google.cloud:google-cloud-datastore:1.105.0'
+	implementation 'org.eclipse.jetty:jetty-server:9.4.34.v20201102'
+	implementation 'org.eclipse.jetty:jetty-webapp:9.4.34.v20201102'
+	implementation 'org.eclipse.jetty:jetty-util:9.4.34.v20201102'
+	implementation 'org.eclipse.jetty:jetty-annotations:9.4.34.v20201102'
+
+}
+
+buildscript {
+	repositories {
+		mavenCentral()
+		mavenLocal()  
+	}
+
+	dependencies { classpath 'com.google.cloud.tools:appengine-gradle-plugin:2.4.1' }
+}

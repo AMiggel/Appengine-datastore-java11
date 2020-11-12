@@ -1,0 +1,5 @@
+runtime: java11
+api_version: 3
+env: standard
+entrypoint: 'java -cp "*" gae.dastore.Main gae_dastore.war'
+instance_class: F2
