@@ -19,22 +19,50 @@ task fatJar(type: Jar) {
 
 
 task copyDep(type: Copy) {
+	dependsOn fatJar
+	
    from configurations.compileClasspath
    into 'build/libs'
 }
-
+webAppDirName = file('war')
+sourceSets {
+	main {
+		java {
+			srcDir 'src/main/java'
+		}
+		resources {
+			srcDir 'src/main/java'
+		}
+	}
+	
+	test {
+		java {
+			srcDir 'test'
+		}
+		resources {
+			srcDir 'test-resources'
+		}
+	}
+}
 repositories { 
 	mavenCentral()
 }
 
 dependencies {
-	
-	implementation 'javax.persistence:javax.persistence-api:2.2'
 	implementation 'com.google.cloud:google-cloud-datastore:1.105.0'
+	// https://mvnrepository.com/artifact/com.google.guava/guava
+	compile group: 'com.google.guava', name: 'guava', version: '30.0-jre'
+	// https://mvnrepository.com/artifact/com.sun.jersey.contribs/jersey-multipart
+	compile group: 'com.sun.jersey.contribs', name: 'jersey-multipart', version: '1.19.4'
+	// https://mvnrepository.com/artifact/com.sun.jersey/jersey-bundle
+	compile group: 'com.sun.jersey', name: 'jersey-bundle', version: '1.19.4'
+
+	
 	implementation 'org.eclipse.jetty:jetty-server:9.4.34.v20201102'
 	implementation 'org.eclipse.jetty:jetty-webapp:9.4.34.v20201102'
 	implementation 'org.eclipse.jetty:jetty-util:9.4.34.v20201102'
 	implementation 'org.eclipse.jetty:jetty-annotations:9.4.34.v20201102'
+	implementation fileTree(dir: 'war/WEB-INF/lib', include: '*.jar')
 
 }
 

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	version="2.5">
+
+	<display-name>sab</display-name>
+	<description>
+        Sistema de apoyo a beneficiarios - Fraternidad Medellin
+    </description>
+	<servlet>
+		<description>Servicios Rest</description>
+		<servlet-name>JAX-RS REST Servlet</servlet-name>
+		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+		<init-param>
+			<param-name>com.sun.jersey.config.property.packages</param-name>
+			<param-value>gae.dastore</param-value>
+		</init-param>
+		<init-param>
+			<param-name>com.sun.jersey.config.server.provider.classnames</param-name>
+			<param-value>gae.dastore.GsonMessageBodyHandler</param-value>
+		</init-param>
+		<init-param>
+			<param-name>com.sun.jersey.api.json.POJOMappingFeature</param-name>
+			<param-value>true</param-value>
+		</init-param>
+		<init-param>
+    		<param-name>com.sun.jersey.config.feature.DisableWADL</param-name>
+    		<param-value>true</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>JAX-RS REST Servlet</servlet-name>
+		<url-pattern>/api/*</url-pattern>
+	</servlet-mapping>
+</web-app>

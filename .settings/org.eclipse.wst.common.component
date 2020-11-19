@@ -3,5 +3,6 @@
 	<wb-module deploy-name="gae-dastore">
 		<property name="context-root" value="gae-dastore"/>
 		<wb-resource deploy-path="/WEB-INF/classes" source-path="src/main/java"/>
+		<wb-resource deploy-path="/" source-path="C:/Users/antonio.marin/Documents/Projects/gae-dastore/war"/>
 	</wb-module>
 </project-modules>
