@@ -52,17 +52,23 @@ dependencies {
 	implementation 'com.google.cloud:google-cloud-datastore:1.105.0'
 	// https://mvnrepository.com/artifact/com.google.guava/guava
 	compile group: 'com.google.guava', name: 'guava', version: '30.0-jre'
-	// https://mvnrepository.com/artifact/com.sun.jersey.contribs/jersey-multipart
-	compile group: 'com.sun.jersey.contribs', name: 'jersey-multipart', version: '1.19.4'
-	// https://mvnrepository.com/artifact/com.sun.jersey/jersey-bundle
-	compile group: 'com.sun.jersey', name: 'jersey-bundle', version: '1.19.4'
+	// https://mvnrepository.com/artifact/org.glassfish.jersey.media/jersey-media-multipart
+	compile group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart', version: '3.0.0-M6'
+	// https://mvnrepository.com/artifact/org.glassfish.jersey.containers/jersey-container-servlet
+	compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: '3.0.0-M6'
+	// https://mvnrepository.com/artifact/org.glassfish.jersey.core/jersey-client
+	compile group: 'org.glassfish.jersey.core', name: 'jersey-client', version: '3.0.0-M6'
+	// https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api
+	providedCompile group: 'jakarta.servlet', name: 'jakarta.servlet-api', version: '5.0.0'
+	
+	
 
 	
 	implementation 'org.eclipse.jetty:jetty-server:9.4.34.v20201102'
 	implementation 'org.eclipse.jetty:jetty-webapp:9.4.34.v20201102'
 	implementation 'org.eclipse.jetty:jetty-util:9.4.34.v20201102'
 	implementation 'org.eclipse.jetty:jetty-annotations:9.4.34.v20201102'
-	implementation fileTree(dir: 'war/WEB-INF/lib', include: '*.jar')
+	//implementation fileTree(dir: 'war/WEB-INF/lib', include: '*.jar')
 
 }
 
