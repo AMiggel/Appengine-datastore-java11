@@ -5,17 +5,15 @@ import java.io.IOException;
 
 import gae.dastore.persist.User;
 import gae.dastore.persist.UsuarioDAO;
-import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@ApplicationPath("api")
-public class UsuarioServlet extends Application{
+@Path("/usuario")
+public class UsuarioServlet {
 
 
 	@POST
