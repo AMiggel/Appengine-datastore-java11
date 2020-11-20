@@ -1,33 +1,36 @@
 package gae.dastore;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import gae.dastore.persist.User;
 import gae.dastore.persist.UsuarioDAO;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 
 @Path("/usuario")
 public class UsuarioServlet {
 
+	private static final Logger log = Logger.getLogger(UsuarioServlet.class.getName());
 
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON+ ";charset=utf-8")
+	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 	public Response doPost(User user) throws IOException {
+		log.setLevel(Level.INFO);
 
 		UsuarioDAO usuario = new UsuarioDAO();
-		
+
 		usuario.guardar(user);
-		return Response.ok("200",MediaType.APPLICATION_JSON).build();
+		return Response.ok("200", MediaType.APPLICATION_JSON).build();
 	}
 
-	
 //	public void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
 //		UsuarioDAO usuario = new UsuarioDAO();
 //

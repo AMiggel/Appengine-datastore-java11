@@ -22,6 +22,10 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 			<param-name>jersey.config.server.provider.packages.classnames</param-name>
 			<param-value>gae.dastore.GsonMessageBodyHandler</param-value>
 		</init-param>
+		<init-param>
+    		<param-name>jersey.config.server.wadl.disableWadl</param-name>
+    		<param-value>true</param-value>
+		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 	<servlet-mapping>

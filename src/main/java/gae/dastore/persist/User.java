@@ -2,9 +2,11 @@ package gae.dastore.persist;
 
 public class User {
 
-	
+	public User() {
+	}
+
 	private String id;
-	
+
 	private String nombre;
 	private String apellido;
 
