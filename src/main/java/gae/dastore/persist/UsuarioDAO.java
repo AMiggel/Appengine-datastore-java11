@@ -83,17 +83,17 @@ public class UsuarioDAO {
 						Key key = datastore.newKeyFactory().setKind(entityName).newKey((String) keyVal);
 						entity = Entity.newBuilder(key).build();
 					}
-//					} else if (keyVal instanceof Long) {
-//						Key key = datastore.newKeyFactory().setKind(entityName).newKey((Long) keyVal);
-//						entity = Entity.newBuilder(key).build();
-//					} else if (keyVal instanceof Integer) {
-//						Key key = datastore.newKeyFactory().setKind(entityName).newKey((Integer) keyVal);
-//						entity = Entity.newBuilder(key).build();
-//					}
-				} else {
-					throw new Exception("La entidad " + entityName + " no tiene Key");
+				} else if (keyVal instanceof Long) {
+					Key key = datastore.newKeyFactory().setKind(entityName).newKey((Long) keyVal);
+					entity = Entity.newBuilder(key).build();
+				} else if (keyVal instanceof Integer) {
+					Key key = datastore.newKeyFactory().setKind(entityName).newKey((Integer) keyVal);
+					entity = Entity.newBuilder(key).build();
 				}
+			} else {
+				throw new Exception("La entidad " + entityName + " no tiene Key");
 			}
+
 			for (Field f : fields) {
 				f.setAccessible(true);
 				String fieldName = f.getName();

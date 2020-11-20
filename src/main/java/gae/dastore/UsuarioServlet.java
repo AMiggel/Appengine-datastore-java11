@@ -21,7 +21,7 @@ public class UsuarioServlet {
 
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response doPost(User user) throws IOException {
 		log.setLevel(Level.INFO);
 
