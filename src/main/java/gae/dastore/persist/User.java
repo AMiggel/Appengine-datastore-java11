@@ -1,10 +1,13 @@
 package gae.dastore.persist;
 
+import javax.persistence.Id;
+
 public class User {
 
 	public User() {
 	}
 
+	@Id
 	private String id;
 
 	private String nombre;

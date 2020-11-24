@@ -2,6 +2,10 @@ package gae.dastore.persist;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
@@ -49,6 +53,8 @@ public class UsuarioDAO {
 	public Entity objectToEntity(Object object) {
 		Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 		Entity entity = null;
+		Key key = null;
+
 		try {
 			String entityName = object.getClass().getSimpleName();
 			Field[] fields = object.getClass().getDeclaredFields();
@@ -56,7 +62,7 @@ public class UsuarioDAO {
 				f.setAccessible(true);
 				String fieldType = f.getType().getSimpleName();
 				if (fieldType.equals("Key")) {
-					Key key = datastore.newKeyFactory().setKind(entityName).newKey((String) f.get(object));
+					key = datastore.newKeyFactory().setKind(entityName).newKey((String) f.get(object));
 					entity = Entity.newBuilder(key).build();
 					break;
 				}
@@ -80,29 +86,38 @@ public class UsuarioDAO {
 				}
 				if (keyVal != null) {
 					if (keyVal instanceof String) {
-						Key key = datastore.newKeyFactory().setKind(entityName).newKey((String) keyVal);
+						key = datastore.newKeyFactory().setKind(entityName).newKey((String) keyVal);
+						entity = Entity.newBuilder(key).build();
+					} else if (keyVal instanceof Long) {
+						key = datastore.newKeyFactory().setKind(entityName).newKey((Long) keyVal);
+						entity = Entity.newBuilder(key).build();
+					} else if (keyVal instanceof Integer) {
+						key = datastore.newKeyFactory().setKind(entityName).newKey((Integer) keyVal);
 						entity = Entity.newBuilder(key).build();
 					}
-				} else if (keyVal instanceof Long) {
-					Key key = datastore.newKeyFactory().setKind(entityName).newKey((Long) keyVal);
-					entity = Entity.newBuilder(key).build();
-				} else if (keyVal instanceof Integer) {
-					Key key = datastore.newKeyFactory().setKind(entityName).newKey((Integer) keyVal);
-					entity = Entity.newBuilder(key).build();
+
+				} else {
+					throw new Exception("La entidad " + entityName + " no tiene Key");
 				}
-			} else {
-				throw new Exception("La entidad " + entityName + " no tiene Key");
 			}
 
+			List<Field> campos = new ArrayList<Field>();
 			for (Field f : fields) {
 				f.setAccessible(true);
 				String fieldName = f.getName();
 				String fieldType = f.getType().getSimpleName();
 				if (!fieldName.contains("jdo") && !fieldType.equals("Key")) {
 					Object fieldValue = f.get(object);
-					entity.newBuilder().set(fieldName, (Value<?>) fieldValue);
+					campos.add(f);
+					// System.out.println("campo" + campos.toString() + " " +
+					// campos.iterator().next().get(object).toString());
 				}
 			}
+
+			System.out.println(campos.stream().map((campo) -> campo.getName()).toString());
+
+		
+			entity = Entity.newBuilder(key).set("", campos.iterator().next().get(object).toString()).build();
 			// setea clave primaria
 		} catch (
 
