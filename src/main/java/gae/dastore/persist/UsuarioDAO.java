@@ -3,14 +3,12 @@ package gae.dastore.persist;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.Value;
 
 public class UsuarioDAO {
 
@@ -21,33 +19,67 @@ public class UsuarioDAO {
 
 	}
 
-	public void eliminar(String id) {
-		Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
-		Key usuarioKey = asignarKey(id);
+	public Entity obtenerUsuarioPorNombre(String nombre) {
 
-		datastore.delete(usuarioKey);
+		Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+		User usuario = null;
+
+		Key key = datastore.newKeyFactory().setKind(usuario.getClass().getName()).newKey(nombre);
+
+		Entity entity = datastore.get(key);
+
+		return entity;
 	}
 
-//	public List<User> obtenerUsuarios() {
-//		List<User> usuarios = new ArrayList<User>();
-//		Query<Entity> query = Query.newEntityQueryBuilder().setKind("user").build();
-//		QueryResults<Entity> results = datastore.run(query);
-//		while (results.hasNext()) {
-//			User usuario = new User();
-//			Entity entity = results.next();
-//			usuario.setNombre(entity.getString("nombre"));
-//			usuario.setApellido(entity.getString("apellido"));
-//			usuario.setId(entity.getString("id"));
-//			usuarios.add(usuario);
-//		}
-//		return usuarios;
-//	}
+	public static Object getObject(Object object, Entity entity) {
+		while (object != null) {
+			try {
+				for (Field f : object.getClass().getDeclaredFields()) {
+					if (!f.getName().contains("jdo")) {
+						f.setAccessible(true);
+						try {
+							// Claves primarias
+							Object value;
+							if ("stCodigo".equalsIgnoreCase(f.getName())
+									|| "stNumeroSolicitud".equalsIgnoreCase(f.getName())
+									|| "stId".equalsIgnoreCase(f.getName())
+									|| "stEmail".equalsIgnoreCase(f.getName())) {
+								if (!(object instanceof User) && "stEmail".equalsIgnoreCase(f.getName())) {
+									value = entity.getString(f.getName());
+								} else {
+									value = entity.getKey().getName();
+								}
+							} else {
+								value = entity.getString(f.getName());
+							}
 
-	private Key asignarKey(String value) {
-		Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
-		Key key = datastore.newKeyFactory().setKind("user").newKey(value);
+							String fieldType = f.getType().getSimpleName();
+							// System.out.println("Campo "+f.getName()+" Valor"+value);
+							if (fieldType.equals("Integer") || fieldType.equals("int")) {
+								value = Integer.parseInt(value.toString());
+							} else if (fieldType.equals("Long") || fieldType.equals("long")) {
+								value = Long.parseLong(value.toString());
+							}
+							f.set(object, value);
 
-		return key;
+							// Seteamos la clave
+							if (fieldType.equals("Key")) {
+								f.set(object, entity.getKey());
+							}
+						} catch (IllegalArgumentException ie) {
+							ie.printStackTrace();
+						} catch (IllegalAccessException ae) {
+							ae.printStackTrace();
+						}
+					}
+				}
+				return object;
+			} catch (Exception e) {
+				e.printStackTrace();
+				return object;
+			}
+		}
+		return object;
 	}
 
 	public Entity objectToEntity(Object object) {
@@ -84,7 +116,7 @@ public class UsuarioDAO {
 						}
 					}
 				}
-				if (keyVal != null) { //asigna llave de la entidad
+				if (keyVal != null) { // asigna llave de la entidad
 					if (keyVal instanceof String) {
 						key = datastore.newKeyFactory().setKind(entityName).newKey((String) keyVal);
 						entityBuilder = Entity.newBuilder(key);
@@ -109,7 +141,7 @@ public class UsuarioDAO {
 				if (!fieldName.contains("jdo") && !fieldType.equals("Key")) {
 					Object fieldValue = f.get(object);
 					campos.add(f);
-					entityBuilder.set(fieldName, fieldValue.toString()); //asigna campos a la entidad
+					entityBuilder.set(fieldName, fieldValue.toString()); // asigna campos a la entidad
 				}
 			}
 
