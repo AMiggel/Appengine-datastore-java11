@@ -52,7 +52,7 @@ public class UsuarioDAO {
 
 	public Entity objectToEntity(Object object) {
 		Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
-		Entity entity = null;
+		Entity.Builder entityBuilder = null;
 		Key key = null;
 
 		try {
@@ -63,13 +63,13 @@ public class UsuarioDAO {
 				String fieldType = f.getType().getSimpleName();
 				if (fieldType.equals("Key")) {
 					key = datastore.newKeyFactory().setKind(entityName).newKey((String) f.get(object));
-					entity = Entity.newBuilder(key).build();
+					entityBuilder = Entity.newBuilder(key);
 					break;
 				}
 			}
 
-			if (entity == null) {
-				// Si el id no es de tipo Key, lo buscamos
+			if (entityBuilder == null) {
+				// Si el id no es de tipo Key, lo buscamos por la anotacion @ID de jpa
 				Object keyVal = null;
 				outerloop: for (Field f : fields) {
 					f.setAccessible(true);
@@ -84,16 +84,16 @@ public class UsuarioDAO {
 						}
 					}
 				}
-				if (keyVal != null) {
+				if (keyVal != null) { //asigna llave de la entidad
 					if (keyVal instanceof String) {
 						key = datastore.newKeyFactory().setKind(entityName).newKey((String) keyVal);
-						entity = Entity.newBuilder(key).build();
+						entityBuilder = Entity.newBuilder(key);
 					} else if (keyVal instanceof Long) {
 						key = datastore.newKeyFactory().setKind(entityName).newKey((Long) keyVal);
-						entity = Entity.newBuilder(key).build();
+						entityBuilder = Entity.newBuilder(key);
 					} else if (keyVal instanceof Integer) {
 						key = datastore.newKeyFactory().setKind(entityName).newKey((Integer) keyVal);
-						entity = Entity.newBuilder(key).build();
+						entityBuilder = Entity.newBuilder(key);
 					}
 
 				} else {
@@ -109,15 +109,10 @@ public class UsuarioDAO {
 				if (!fieldName.contains("jdo") && !fieldType.equals("Key")) {
 					Object fieldValue = f.get(object);
 					campos.add(f);
-					// System.out.println("campo" + campos.toString() + " " +
-					// campos.iterator().next().get(object).toString());
+					entityBuilder.set(fieldName, fieldValue.toString()); //asigna campos a la entidad
 				}
 			}
 
-			System.out.println(campos.stream().map((campo) -> campo.getName()).toString());
-
-		
-			entity = Entity.newBuilder(key).set("", campos.iterator().next().get(object).toString()).build();
 			// setea clave primaria
 		} catch (
 
@@ -126,7 +121,7 @@ public class UsuarioDAO {
 		} catch (Exception e) {
 			System.err.println(e);
 		}
-		return entity;
+		return entityBuilder.build();
 	}
 
 }
