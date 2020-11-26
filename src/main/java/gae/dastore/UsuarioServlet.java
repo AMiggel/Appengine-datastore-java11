@@ -5,14 +5,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import gae.dastore.persist.User;
 import gae.dastore.persist.UsuarioDAO;
+import gae.dastore.pojo.UserPojo;
 
 @Path("/usuario")
 public class UsuarioServlet {
@@ -31,22 +34,21 @@ public class UsuarioServlet {
 		return Response.ok("200", MediaType.APPLICATION_JSON).build();
 	}
 
-//	public void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
-//		UsuarioDAO usuario = new UsuarioDAO();
-//
-//		usuario.eliminar(request.getParameter("id"));
-//		response.setContentType("text/html");
-//		response.getWriter().println("<h1>user deleted!</h1>");
-//	}
-//
-//	@Override
-//	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-//		UsuarioDAO usuario = new UsuarioDAO();
-//
-//		response.setContentType("application/json");
-//		PrintWriter out = response.getWriter();
-//		out.print(usuario.obtenerUsuarios().toString());
-//		out.flush();
-//
-//	}
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("{id}")
+	public UserPojo getUser(@PathParam("id") String id) {
+
+		UserPojo userPojo = new UserPojo();
+		UsuarioDAO usuario = new UsuarioDAO();
+
+		User user = usuario.obtenerUsuarioPorId(id);
+
+		userPojo.setApellido(user.getApellido());
+		userPojo.setNombre(user.getNombre());
+		userPojo.setId(user.getId());
+
+		return userPojo;
+
+	}
 }

@@ -2,74 +2,70 @@ package gae.dastore.persist;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.NoResultException;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
+import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 
 public class UsuarioDAO {
 
+	Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+
 	public String guardar(User usuario) {
-		Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 		datastore.put(objectToEntity(usuario));
 		return usuario.getNombre();
 
 	}
 
-	public Entity obtenerUsuarioPorNombre(String nombre) {
+	public User obtenerUsuarioPorId(String id) {
 
-		Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 		User usuario = null;
 
-		Key key = datastore.newKeyFactory().setKind(usuario.getClass().getName()).newKey(nombre);
-
+		Key key = datastore.newKeyFactory().setKind("User").newKey(id);
 		Entity entity = datastore.get(key);
 
-		return entity;
+		if (entity != null) {
+			usuario = (User) entityToKind(entity);
+		}
+		return usuario;
 	}
 
-	public static Object getObject(Object object, Entity entity) {
+//	public List<User> getAllUserFilter(String nombre) throws Exception {
+//		List<User> acta;
+//		try {
+//			Query<Entity> query = Query.newEntityQueryBuilder().setKind("User")
+//					.setFilter(CompositeFilter.and(PropertyFilter.eq("nombre", nombre))).build();
+//
+//			List<Entity> results = datastore.prepare(query).asList(FetchOptions.Builder.withDefaults());
+//			acta = (List<Acta>) (List<?>) ClassConstructor.listaDeEntidades(results.iterator());
+//		} catch (NoResultException ex) {
+//			acta = null;
+//		} catch (Exception ex) {
+//			throw ex;
+//		}
+//		return acta;
+//	}
+
+	private static Object getObject(Object object, Entity entity) {
+
 		while (object != null) {
 			try {
 				for (Field f : object.getClass().getDeclaredFields()) {
 					if (!f.getName().contains("jdo")) {
 						f.setAccessible(true);
-						try {
-							// Claves primarias
-							Object value;
-							if ("stCodigo".equalsIgnoreCase(f.getName())
-									|| "stNumeroSolicitud".equalsIgnoreCase(f.getName())
-									|| "stId".equalsIgnoreCase(f.getName())
-									|| "stEmail".equalsIgnoreCase(f.getName())) {
-								if (!(object instanceof User) && "stEmail".equalsIgnoreCase(f.getName())) {
-									value = entity.getString(f.getName());
-								} else {
-									value = entity.getKey().getName();
-								}
-							} else {
-								value = entity.getString(f.getName());
-							}
-
-							String fieldType = f.getType().getSimpleName();
-							// System.out.println("Campo "+f.getName()+" Valor"+value);
-							if (fieldType.equals("Integer") || fieldType.equals("int")) {
-								value = Integer.parseInt(value.toString());
-							} else if (fieldType.equals("Long") || fieldType.equals("long")) {
-								value = Long.parseLong(value.toString());
-							}
-							f.set(object, value);
-
-							// Seteamos la clave
-							if (fieldType.equals("Key")) {
-								f.set(object, entity.getKey());
-							}
-						} catch (IllegalArgumentException ie) {
-							ie.printStackTrace();
-						} catch (IllegalAccessException ae) {
-							ae.printStackTrace();
+						Object value = entity.getString(f.getName());
+						String fieldType = f.getType().getSimpleName();
+						f.set(object, value);
+						if (fieldType.equals("Key")) {
+							f.set(object, entity.getKey());
 						}
 					}
 				}
@@ -82,8 +78,34 @@ public class UsuarioDAO {
 		return object;
 	}
 
-	public Entity objectToEntity(Object object) {
-		Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+	private Object entityToKind(Entity entity) {
+
+		Object objetoRetorno = null;
+
+		try {
+			// obtiene nombre de entidad para asignarselo a la clase
+			objetoRetorno = getObject(Class.forName("gae.dastore.persist." + entity.getKey().getKind())
+					.getDeclaredConstructor().newInstance(), entity);///
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		}
+
+		return objetoRetorno;
+	}
+
+	private Entity objectToEntity(Object object) {
 		Entity.Builder entityBuilder = null;
 		Key key = null;
 
