@@ -1,5 +1,7 @@
 package gae.dastore.persist;
 
+import java.util.Date;
+
 import javax.persistence.Id;
 
 public class User {
@@ -12,6 +14,26 @@ public class User {
 
 	private String nombre;
 	private String apellido;
+	private Integer edad;
+	private String fechaCreacion;
+	
+	
+
+	public Integer getEdad() {
+		return edad;
+	}
+
+	public void setEdad(Integer edad) {
+		this.edad = edad;
+	}
+
+	public String getFechaCreacion() {
+		return fechaCreacion;
+	}
+
+	public void setFechaCreacion(String fechaCreacion) {
+		this.fechaCreacion = fechaCreacion;
+	}
 
 	public String getId() {
 		return id;

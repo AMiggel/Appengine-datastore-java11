@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.NoResultException;
@@ -12,6 +13,7 @@ import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 
@@ -38,22 +40,38 @@ public class UsuarioDAO {
 		return usuario;
 	}
 
-//	public List<User> getAllUserFilter(String nombre) throws Exception {
-//		List<User> acta;
-//		try {
-//			Query<Entity> query = Query.newEntityQueryBuilder().setKind("User")
-//					.setFilter(CompositeFilter.and(PropertyFilter.eq("nombre", nombre))).build();
-//
-//			List<Entity> results = datastore.prepare(query).asList(FetchOptions.Builder.withDefaults());
-//			acta = (List<Acta>) (List<?>) ClassConstructor.listaDeEntidades(results.iterator());
-//		} catch (NoResultException ex) {
-//			acta = null;
-//		} catch (Exception ex) {
-//			throw ex;
-//		}
-//		return acta;
-//	}
+	public List<User> obtenerUsuarioPorNombre(String nombre) throws Exception {
+		List<User> user;
+		try {
+			Query<Entity> query = Query.newEntityQueryBuilder().setKind("User")
+					.setFilter(CompositeFilter.and(PropertyFilter.eq("nombre", nombre))).build();
+			QueryResults<Entity> results = datastore.run(query);
+			user = (List<User>) (List<?>) listaDeEntidades(results);
+		} catch (NoResultException ex) {
+			user = null;
+		} catch (Exception ex) {
+			throw ex;
+		}
+		return user;
+	}
 
+	
+	public List<User> obtenerUsuarioPorFecha(String fecha) throws Exception {
+		List<User> user;
+		try {
+			Query<Entity> query = Query.newEntityQueryBuilder().setKind("User")
+					.setFilter(CompositeFilter.and(PropertyFilter.ge("fechaCreacion", fecha))).build();
+
+			QueryResults<Entity> results = datastore.run(query);
+			user = (List<User>) (List<?>) listaDeEntidades(results);
+		} catch (NoResultException ex) {
+			user = null;
+		} catch (Exception ex) {
+			throw ex;
+		}
+		return user;
+	}
+	
 	private static Object getObject(Object object, Entity entity) {
 
 		while (object != null) {
@@ -63,6 +81,13 @@ public class UsuarioDAO {
 						f.setAccessible(true);
 						Object value = entity.getString(f.getName());
 						String fieldType = f.getType().getSimpleName();
+						
+						if (fieldType.equals("Integer") || fieldType.equals("int")) {
+							value = Integer.parseInt(value.toString());
+						} else if (fieldType.equals("Long") || fieldType.equals("long")) {
+							value = Long.parseLong(value.toString());
+						}
+						
 						f.set(object, value);
 						if (fieldType.equals("Key")) {
 							f.set(object, entity.getKey());
@@ -76,6 +101,38 @@ public class UsuarioDAO {
 			}
 		}
 		return object;
+	}
+
+	public static List<Object> listaDeEntidades(Iterator<Entity> entidades) {
+		List<Object> listaRetorno = null;
+		Entity entidad = null;
+		try {
+			if (entidades.hasNext()) {
+				listaRetorno = new ArrayList<Object>();
+			}
+			while (entidades.hasNext()) {
+				entidad = entidades.next();
+				listaRetorno.add(getObject(Class.forName("gae.dastore.persist." + entidad.getKey().getKind())
+						.getDeclaredConstructor().newInstance(), entidad));
+			}
+		} catch (ClassNotFoundException e) {
+			listaRetorno = null;
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			listaRetorno = null;
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			listaRetorno = null;
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		}
+
+		return listaRetorno;
 	}
 
 	private Object entityToKind(Entity entity) {
